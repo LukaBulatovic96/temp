@@ -7,10 +7,16 @@ const gridResolution = ref(30);
 const context = ref();
 const imgData = ref();
 const myCanvas = ref(null);
-const unitRadius = ref(3);
+const unitRadius = ref(5);
 
-const unit = ref();
-const physical_Unit = ref();
+const unit = ref({
+  x: 200,
+  y: 200,
+  velocity:0,
+  acceleration: 0,
+  angle: 0,
+  angleRotationSpeed: 0,
+});
 
 const draw = () => {
   context.value.clearRect(
@@ -23,6 +29,12 @@ const draw = () => {
     gridSize.value * gridResolution.value,
     gridSize.value * gridResolution.value
   );
+
+  draw_Map();
+  draw_Unit();
+  context.value.putImageData(imgData.value, 0, 0);
+};
+const draw_Map = () => {
   for (let i = 0; i < gridSize.value; i++) {
     for (let j = 0; j < gridSize.value; j++) {
       for (let index = 0; index < gridResolution.value; index++) {
@@ -98,64 +110,70 @@ const draw = () => {
       }
     }
   }
+};
+const getRandomInt = (max) => {
+  return Math.floor(Math.random() * max);
+};
+const checkCollision = (i, j) => {
+  imgData.value = context.value.createImageData(
+    gridSize.value * gridResolution.value,
+    gridSize.value * gridResolution.value
+  );
+  for (
+    let offSet_i = -unitRadius.value;
+    offSet_i < unitRadius.value;
+    offSet_i++
+  ) {
+    for (
+      let offSet_j = -unitRadius.value;
+      offSet_j < unitRadius.value;
+      offSet_j++
+    ) {
+      if (
+        offSet_i * offSet_i + offSet_j * offSet_j <=
+        unitRadius.value * unitRadius.value
+      ) {
+        if (
+          map[Math.floor((i + offSet_i) / gridResolution.value)][
+            Math.floor((j + offSet_j) / gridResolution.value)
+          ] == 0
+        ) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+};
 
+const draw_Unit = () => {
   for (let i = -unitRadius.value; i < unitRadius.value; i++) {
     for (let j = -unitRadius.value; j < unitRadius.value; j++) {
       if (i * i + j * j <= unitRadius.value * unitRadius.value) {
         imgData.value.data[
-          ((unit.value[0] + i) * gridSize.value * gridResolution.value +
-            unit.value[1] +
+          ((Math.round(unit.value.y) + i) * gridSize.value * gridResolution.value +
+            Math.round(unit.value.x) +
             j) *
             4 +
             0
         ] = parseInt("ff", 16);
         imgData.value.data[
-          ((unit.value[0] + i) * gridSize.value * gridResolution.value +
-            unit.value[1] +
+          ((Math.round(unit.value.y) + i) * gridSize.value * gridResolution.value +
+            Math.round(unit.value.x) +
             j) *
             4 +
             1
         ] = parseInt("00", 16);
         imgData.value.data[
-          ((unit.value[0] + i) * gridSize.value * gridResolution.value +
-            unit.value[1] +
+          ((Math.round(unit.value.y) + i) * gridSize.value * gridResolution.value +
+            Math.round(unit.value.x) +
             j) *
             4 +
             2
         ] = parseInt("00", 16);
         imgData.value.data[
-          ((unit.value[0] + i) * gridSize.value * gridResolution.value +
-            unit.value[1] +
-            j) *
-            4 +
-            3
-        ] = parseInt("ff", 16);
-
-    ////////////////////////////////////////////////////
-        imgData.value.data[
-          ((physical_Unit.value[0] + i) * gridSize.value * gridResolution.value +
-            physical_Unit.value[1] +
-            j) *
-            4 +
-            0
-        ] = parseInt("00", 16);
-        imgData.value.data[
-          ((physical_Unit.value[0] + i) * gridSize.value * gridResolution.value +
-            physical_Unit.value[1] +
-            j) *
-            4 +
-            1
-        ] = parseInt("00", 16);
-        imgData.value.data[
-          ((physical_Unit.value[0] + i) * gridSize.value * gridResolution.value +
-            physical_Unit.value[1] +
-            j) *
-            4 +
-            2
-        ] = parseInt("ff", 16);
-        imgData.value.data[
-          ((physical_Unit.value[0] + i) * gridSize.value * gridResolution.value +
-            physical_Unit.value[1] +
+          ((Math.round(unit.value.y) + i) * gridSize.value * gridResolution.value +
+            Math.round(unit.value.x) +
             j) *
             4 +
             3
@@ -163,66 +181,42 @@ const draw = () => {
       }
     }
   }
-
-  context.value.putImageData(imgData.value, 0, 0);
 };
 
-const getRandomInt = (max) => {
-  return Math.floor(Math.random() * max);
-};
+const updateUnit = () => {
+  unit.value.velocity += unit.value.acceleration;
+  unit.value.angle += unit.value.angleRotationSpeed;
 
-const checkCollision = (i,j) => {
-     imgData.value = context.value.createImageData(
-    gridSize.value * gridResolution.value,
-    gridSize.value * gridResolution.value
-  );
-    for (let offSet_i = -unitRadius.value; offSet_i < unitRadius.value; offSet_i++) {
-        for (let offSet_j = -unitRadius.value; offSet_j < unitRadius.value; offSet_j++) {
-            if(offSet_i * offSet_i + offSet_j * offSet_j <= unitRadius.value * unitRadius.value){
-                if( map[Math.floor((i+offSet_i)/gridResolution.value)][Math.floor((j+offSet_j)/gridResolution.value)]==0){
-                    return false
-                }
-            }
-    }
-    }
-    return true;
-}
-
-const moveUnit = () => {
-  const rememberedUnit = JSON.parse(JSON.stringify(unit.value));
-  let i=0;
-  while (i<100) {
-    unit.value = JSON.parse(JSON.stringify(rememberedUnit));
-    unit.value[0] += getRandomInt(15) - 4;
-    unit.value[1] += getRandomInt(15) - 4;
-
-    if(unit.value[0] <= unitRadius.value ){
-    unit.value[0] = unitRadius.value*2
-  }
-   if(unit.value[1] <= unitRadius.value ){
-    unit.value[1] = unitRadius.value*2
-  }
-    //CHECK COLLISION
-    if (checkCollision( unit.value[0], unit.value[1])) {
-        console.log("HIT: ",i);
-        i=100;
-    }
-    i++;
-  }
-  
+  unit.value.x = unit.value.x + unit.value.velocity * Math.cos(unit.value.angle);
+  unit.value.y = unit.value.y+ unit.value.velocity * Math.sin(unit.value.angle);
 };
 
 const period = () => {
-  moveUnit()
+  updateUnit();
   draw();
 };
 
+const handleKeyDown = (event) => {
+  if(event.key=='a'){
+    unit.value.angle -= 0.1;
+  }
+  if(event.key=='d'){
+    unit.value.angle += 0.1;
+  }
+  if(event.key=='w'){
+    unit.value.velocity += 0.1;
+  }
+  if(event.key=='s'){
+    unit.value.velocity -= 0.1;
+  }
+  
+console.log("KEYDOWN: ",event.key);
+}
+
 onMounted(() => {
-  unit.value = [20, 20];
-  physical_Unit.value = [10,10];
+  window.addEventListener('keydown', handleKeyDown);
   context.value = myCanvas.value.getContext("2d");
-//   period();
-  setInterval(period, 5);
+  setInterval(period, 16);
 });
 </script>
 <template>
