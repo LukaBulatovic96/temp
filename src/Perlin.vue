@@ -3,6 +3,8 @@ import { ref, onMounted } from "vue";
 import { generatePerlin } from "./perlin";
 // const net= new brain.NeuralNetwork();
 
+const loading = ref(true);
+
 const grid = ref([]);
 const size = ref(128);
 const interpolation = ref(true);
@@ -16,12 +18,18 @@ const contextBAW = ref();
 const imgData = ref();
 const imgDataBAW = ref();
 const d3Canvas = ref(null);
-const reset = () => {
-  reorderPerlin();
+const reset = async () => {
+  loading.value=true;
+  await reorderPerlin();
+  loading.value=false;
 };
 
 const reorderPerlin = () => {
+
+  
+
   girdBAW.value = generatePerlin(size.value,noise.value,startingDimension.value,interpolation.value);
+  console.log("gridBAW: ",girdBAW.value);
   grid.value = [];
   girdBAW.value.forEach((row, i) => {
     grid.value.push([]);
@@ -84,13 +92,15 @@ const reorderPerlin = () => {
   });
 draw();
 drawBlackAndWhite();
+return;
 };
 
-onMounted(() => {
+onMounted(async () => {
+  loading.value=true;
   context.value = myCanvas.value.getContext("2d");
   contextBAW.value = myCanvasBlackAndWhite.value.getContext("2d");
-  reorderPerlin(size.value);
-  
+  await reorderPerlin(size.value);
+  loading.value=false;
 });
 
 const drawBlackAndWhite = () => {
@@ -129,45 +139,60 @@ const draw = () => {
 </script>
 
 <template>
-<canvas ref="d3Canvas"  width="200" 
+<!-- <canvas ref="d3Canvas"  width="200" 
         height="100" 
-        style="border:4px solid #000;"></canvas>
-<div>
-  <label for="">Size</label>
-<input v-model="size" />
-</div>
-<div>
-  <label for="">Noise</label>
-<input v-model="noise" />
-</div>
-<div>
-  <label for="">Starting Dimension</label>
-<input v-model="startingDimension" />
-</div>
-<form>
-  <label for="">Interpolation</label>
-  <div :class="interpolation ? 'dot-clicked':'dot'" @click="interpolation=!interpolation">
-    
-  </div>
+        style="border:4px solid #000;"></canvas> -->
 
-</form>
+  <div class="container w-50">
+    <div class="row my-1">
+      <div class="col-sm"> <label for="">Size</label></div>
+      <div class="col-sm"><input v-model="size" /></div>
+    </div>
+    <div class="row my-1">
+      <div class="col-sm"> <label for="">Noise</label></div>
+      <div class="col-sm"><input v-model="noise" /></div>
+    </div>
+    <div class="row my-1">
+      <div class="col-sm">  <label for="">Starting Dimension</label></div>
+      <div class="col-sm"><input v-model="startingDimension" /></div>
+    </div>
+    <div class="row my-1 ">
+      <div class="col-sm">  <label for="">Interpolation</label></div>
+      <div class="col-sm  ps-5">  <div :class="interpolation ? 'dot-clicked':'dot'" @click="interpolation=!interpolation"></div>
+    </div>
+    <div class="row my-1">
+      <button @click="reset" class="btn btn-warning">RESET</button></div>
+     </div>
 
-  <button @click="reset">RESET</button>
-  <div>
-     <canvas ref="myCanvas" :width="size" :height="size"></canvas>
-      <canvas ref="myCanvasBlackAndWhite" :width="size" :height="size"></canvas>
+    </div>
+<div v-show="loading">  <div class="lds-ripple"><div></div><div></div></div></div>
+  
+
+  <div class="w-75 container mt-5 p-5 text-center" v-show="!loading">
+    <div class="row d-flex my-3">
+      <div class="col-sm  ">
+        <h1>Raw Map</h1>
+        <canvas ref="myCanvasBlackAndWhite" :width="size" :height="size"></canvas>
+       
+      </div>
+      
+    </div>
+
+    <div class="row d-flex ">
+      <div class="col-sm ">
+        <h1>Color Map</h1>
+        <canvas ref="myCanvas" :width="size" :height="size"></canvas>
+      </div>
+      
+    </div>
+     
+      
   </div>
  
 </template>
 
-<style>
-.square {
-  width: 2px;
-  height: 2px;
-}
-.flex {
-  display: flex;
-}
+<style lang="css">
+
 
 .dot {
   height: 25px;
@@ -183,5 +208,54 @@ const draw = () => {
   border-radius: 50%;
   display: inline-block;
 }
+
+
+.lds-ripple {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-ripple div {
+  position: absolute;
+  border: 4px solid #e40202;
+  opacity: 1;
+  border-radius: 50%;
+  animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.lds-ripple div:nth-child(2) {
+  animation-delay: -0.5s;
+}
+@keyframes lds-ripple {
+  0% {
+    top: 36px;
+    left: 36px;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  4.9% {
+    top: 36px;
+    left: 36px;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  5% {
+    top: 36px;
+    left: 36px;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 0px;
+    left: 0px;
+    width: 72px;
+    height: 72px;
+    opacity: 0;
+  }
+}
+
 </style>
 
