@@ -24,7 +24,7 @@ const routerState = ref(0);
       <button  type="button" class="btn  w-50" @click="routerState=1"  :class="routerState==1 ? 'btn-success':'btn-secondary'">Maze</button>
     </div>
     <div class="col-sm d-flex justify-content-center">
-      <button type="button" class="btn  w-50"  @click="routerState=2"  :class="routerState==2 ? 'btn-success':'btn-secondary'">Bulatato</button>
+      <button type="button" class="btn  w-50"  @click="routerState=2"  :class="routerState==2 ? 'btn-success':'btn-secondary'">GAme</button>
     </div>
   </div>
  
