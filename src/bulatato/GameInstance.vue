@@ -29,6 +29,10 @@ const entity = ref();
 const map = ref();
 const enemy = ref();
 
+const mouseOver_selection = ref(null);
+
+const buttonPressed=ref(-1);
+
 onMounted(() => {
 
   context.value = myCanvas.value.getContext("2d");
@@ -65,6 +69,13 @@ onMounted(() => {
       },
     },
     context: context.value,
+    attack: {
+      target:null,
+      range:30,
+      attackSpeed: 1,
+      lastPerformed:0,
+      damage:5
+    }
   });
 
   enemy.value = new Entity({
@@ -80,7 +91,7 @@ onMounted(() => {
       },
     },
     context: context.value,
-    radius:10,
+    radius:12,
     width:16,
     height:16
   });
@@ -95,7 +106,12 @@ onMounted(() => {
 
   myCanvas.value.addEventListener("mousedown", function (e) {
     let position = getMousePosition(myCanvas.value, e);
-    if (position.button == 2) initializePath(position.x, position.y);
+    buttonPressed.value = position.button;
+    if (position.button == 2) {
+      initializePath(position.x, position.y);
+        entity.value.attack.target=mouseOver_selection.value;
+    }
+   
   });
   myCanvas.value.addEventListener("mousemove", function (e) {
     let position = getMousePosition(myCanvas.value, e);
@@ -110,8 +126,11 @@ onMounted(() => {
       ) <= enemy.value.radius
     ) {
       enemy.value.highlight = true;
+      mouseOver_selection.value = enemy.value;
+      
     } else {
       enemy.value.highlight = false;
+      mouseOver_selection.value = null;
     }
   };
 
@@ -124,10 +143,10 @@ onMounted(() => {
 
 const render = () => {
   window.requestAnimationFrame(render);
-
   drawBackground();
   drawEnemy();
   updatePlayer();
+
 };
 
 const getMousePosition = (canvas, event) => {
@@ -140,7 +159,7 @@ const getMousePosition = (canvas, event) => {
 };
 
 const initializePath = (x, y) => {
-  path.value = {
+  entity.value.path = {
     position: {
       x: x,
       y: y,
@@ -149,14 +168,14 @@ const initializePath = (x, y) => {
 };
 
 const updatePlayer = () => {
-  if (path.value != null) {
+  if (entity.value.path != null) {
     const entityCenter_offset_X = entity.value.width / 2;
     const entityCenter_offset_Y = entity.value.height / 2;
 
     const delta_X =
-      path.value.position.x - (entity.value.position.x + entityCenter_offset_X);
+   entity.value.path.position.x - (entity.value.position.x + entityCenter_offset_X);
     const delta_Y =
-      path.value.position.y - (entity.value.position.y + entityCenter_offset_Y);
+    entity.value.path.position.y - (entity.value.position.y + entityCenter_offset_Y);
     const z = Math.sqrt(Math.pow(delta_X, 2) + Math.pow(delta_Y, 2));
 
     if (delta_X > 0) {
@@ -167,9 +186,9 @@ const updatePlayer = () => {
 
     const ratio = entity.value.speed / z;
     if (ratio >= 1) {
-      entity.value.position.x = path.value.position.x - entityCenter_offset_X;
-      entity.value.position.y = path.value.position.y - entityCenter_offset_Y;
-      path.value = null;
+      entity.value.position.x = entity.value.path.position.x - entityCenter_offset_X;
+      entity.value.position.y = entity.value.path.position.y - entityCenter_offset_Y;
+      entity.value.path = null;
     } else {
       entity.value.position.x += ratio * delta_X;
       entity.value.position.y += ratio * delta_Y;
@@ -179,10 +198,10 @@ const updatePlayer = () => {
   } else {
     entity.value.currentAction = "idle";
   }
-  if (doObjectsCollide(entity.value, enemy.value)) {
-    resetEnemy();
-    cash.value += 10;
-  }
+  // if (doObjectsCollide(entity.value, enemy.value)) {
+  //   resetEnemy();
+  //   cash.value += 10;
+  // }
   drawPlayer();
 };
 
@@ -223,6 +242,13 @@ const increaseSpeed = () => {
     cash.value -= 10;
   }
 };
+const manageHP = (delta) => {
+  entity.value.currentHp+= delta
+  if(entity.value.currentHp >= entity.value.hp) entity.value.currentHp = entity.value.hp;
+  if(entity.value.currentHp <=0) entity.value.currentHp = 0
+
+  // console.log("CURR HP: ",entity);
+}
 const doObjectsCollide = (unit1, unit2) => {
   let distance = Math.sqrt(
     Math.pow(
@@ -272,8 +298,21 @@ const resetEnemy = () => {
   }
 };
 const drawEnemy = () => {
+  if(enemy.value.currentHp <= 0) { resetEnemy();
+    enemy.value.currentHp = enemy.value.hp
+  cash.value += 10;}
   enemy.value.update();
 };
+
+const  incAttackSpeed=() => {
+  entity.value.attack.attackSpeed -= 0.05;
+  cash.value -=10;
+}
+
+const  incAttack=() => {
+  entity.value.attack.damage += 2;
+  cash.value -=10;
+}
 </script>
 
 <template>
@@ -312,14 +351,48 @@ const drawEnemy = () => {
       >
         ++ (10$)
       </div>
+
       <div class="col-sm text-center">
-        Size: {{ entity ? entity.width : "No entity" }}
+        Damage: {{ entity ? entity.attack.damage : "No entity" }}
       </div>
       <div
         class="col-sm text-center btn btn-success cursor-pointer"
-        :class="true ? ' disabled ' : ''"
+        @click="incAttack()"
+        :class="cash < 10 ? ' disabled ' : ''"
       >
-        ++ (20$)
+        ++ (10$)
+      </div>
+
+      <div class="col-sm text-center">
+        Attack Speed: {{ entity ? entity.attack.attackSpeed : "No entity" }}
+      </div>
+      <div
+        class="col-sm text-center btn btn-success cursor-pointer"
+        @click="incAttackSpeed()"
+        :class="cash < 10 ? ' disabled ' : ''"
+      >
+        ++ (10$)
+      </div>
+
+
+
+
+      <div class="col-sm text-center">
+        HP
+      </div>
+      <div
+        class="col-sm text-center btn btn-success cursor-pointer"
+        :class="false ? ' disabled ' : ''"
+        @click="manageHP(5)"
+      >
+        ++ (2$)
+      </div>
+      <div
+        class="col-sm text-center btn btn-success cursor-pointer"
+        :class="false ? ' disabled ' : ''"
+        @click="manageHP(-5)"
+      >
+        -- (2$)
       </div>
     </div>
   </div>

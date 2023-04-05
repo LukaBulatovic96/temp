@@ -276,11 +276,21 @@ const render = () => {
 
   drawBackground();
   drawEnemy();
+  drawUI();
+
   updatePlayer();
+ 
   entity.value.update();
 
  
 };
+
+const drawUI = () => {
+  drawHPBars();
+}
+const drawHPBars = () => {
+
+}
 
 const increaseSpeed = () => {
     if(cash.value>=10){
