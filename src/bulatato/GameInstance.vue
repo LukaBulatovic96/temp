@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from "vue";
-import { Entity } from "./entity";
+import { Entity } from "./superclass";
 import { Map } from "./map";
 
 const emit = defineEmits(["exitGame"]);
@@ -14,6 +14,7 @@ const gameSettings = ref({
 
 const context = ref(null);
 const myCanvas = ref(null);
+const audio = ref();
 
 const floorSrc = ref("https://i.ibb.co/dfWQTQF/floor-1.png");
 
@@ -24,77 +25,34 @@ const player_imageData = ref();
 const enemy_imageData = ref();
 const path = ref(null);
 const mainDiv = ref(null);
-const cash = ref(0);
-const entity = ref();
+const cash = ref(1000);
+
 const map = ref();
-const enemy = ref();
 
 const mouseOver_selection = ref(null);
 
-const buttonPressed=ref(-1);
+const buttonPressed = ref(-1);
+
+const audioHandle = () => {
+  audio.value.play();
+  // if(audio.value.paused)audio.value.play();
+  // else audio.value.pause();
+};
+
+const spellImage = ref();
+const spellSrc = ref("https://i.ibb.co/ZcXYRst/16-sunburn-spritesheet.png");
+const spell = ref({
+  exists: false,
+  position: {
+    x: 0,
+    y: 0,
+  },
+});
+const xFrame = ref(0);
+const yFrame = ref(0);
 
 onMounted(() => {
-
   context.value = myCanvas.value.getContext("2d");
-  entity.value = new Entity({
-    position: { x: 50, y: 50 },
-    imageSrc: {
-      run: {
-        left: [
-          "https://i.ibb.co/k4mGXjX/output-onlinepngtools-10.png",
-          "https://i.ibb.co/mzSS7f1/output-onlinepngtools-7.png",
-          "https://i.ibb.co/30P1wN2/output-onlinepngtools-8.png",
-          "https://i.ibb.co/PY6vqFF/output-onlinepngtools-9.png",
-        ],
-        right: [
-          "https://i.ibb.co/0sySvyn/big-demon-run-anim-f0.png",
-          "https://i.ibb.co/Sw94cLB/big-demon-run-anim-f1.png",
-          "https://i.ibb.co/NTfStbv/big-demon-run-anim-f2.png",
-          "https://i.ibb.co/vDxPm0v/big-demon-run-anim-f3.png",
-        ],
-      },
-      idle: {
-        left: [
-          "https://i.ibb.co/5Tv3tkf/output-onlinepngtools-2.png",
-          "https://i.ibb.co/gF0Vqyx/output-onlinepngtools-3.png",
-          "https://i.ibb.co/kHQTtgL/output-onlinepngtools-4.png",
-          "https://i.ibb.co/Wnmvf2P/output-onlinepngtools-5.png",
-        ],
-        right: [
-          "https://i.ibb.co/BnJmR70/big-demon-idle-anim-f3.png",
-          "https://i.ibb.co/zFcLPjH/big-demon-idle-anim-f0.png",
-          "https://i.ibb.co/pbzn6k9/big-demon-idle-anim-f1.png",
-          "https://i.ibb.co/wyPtCgk/big-demon-idle-anim-f2.png",
-        ],
-      },
-    },
-    context: context.value,
-    attack: {
-      target:null,
-      range:30,
-      attackSpeed: 1,
-      lastPerformed:0,
-      damage:5
-    }
-  });
-
-  enemy.value = new Entity({
-    position: { x: 150, y: 150 },
-    imageSrc: {
-      run: {
-        left: ["https://i.ibb.co/4pPSNxk/chest-full-open-anim-f1.png"],
-        right: ["https://i.ibb.co/4pPSNxk/chest-full-open-anim-f1.png"],
-      },
-      idle: {
-        left: ["https://i.ibb.co/4pPSNxk/chest-full-open-anim-f1.png"],
-        right: ["https://i.ibb.co/4pPSNxk/chest-full-open-anim-f1.png"],
-      },
-    },
-    context: context.value,
-    radius:12,
-    width:16,
-    height:16
-  });
 
   map.value = new Map({
     imageSrc: floorSrc.value,
@@ -105,34 +63,18 @@ onMounted(() => {
   });
 
   myCanvas.value.addEventListener("mousedown", function (e) {
-    let position = getMousePosition(myCanvas.value, e);
-    buttonPressed.value = position.button;
-    if (position.button == 2) {
-      initializePath(position.x, position.y);
-        entity.value.attack.target=mouseOver_selection.value;
-    }
-   
+    // let position = getMousePosition(myCanvas.value, e);
+    // buttonPressed.value = position.button;
+    // if (position.button == 2) {
+    //   cast();
+    //   initializePath(position.x, position.y);
+    //   entity.value.attack.target = mouseOver_selection.value;
+    // }
   });
   myCanvas.value.addEventListener("mousemove", function (e) {
-    let position = getMousePosition(myCanvas.value, e);
-    checkCollisionAllEntities(position.x,position.y);
+    // let position = getMousePosition(myCanvas.value, e);
+    // checkCollisionAllEntities(position.x, position.y);
   });
-
-  const checkCollisionAllEntities = (x, y) => {
-    if (
-      Math.sqrt(
-        Math.pow(x - enemy.value.position.x-enemy.value.width/2,2) +
-          Math.pow(y - enemy.value.position.y-enemy.value.height/2,2)
-      ) <= enemy.value.radius
-    ) {
-      enemy.value.highlight = true;
-      mouseOver_selection.value = enemy.value;
-      
-    } else {
-      enemy.value.highlight = false;
-      mouseOver_selection.value = null;
-    }
-  };
 
   mainDiv.value.addEventListener("contextmenu", (event) => {
     event.preventDefault();
@@ -141,11 +83,11 @@ onMounted(() => {
   render();
 });
 
+const checkCollisionAllEntities = (x, y) => {};
+
 const render = () => {
   window.requestAnimationFrame(render);
   drawBackground();
-  drawEnemy();
-  updatePlayer();
 
 };
 
@@ -158,56 +100,6 @@ const getMousePosition = (canvas, event) => {
   return { x: x, y: y, button: event.button };
 };
 
-const initializePath = (x, y) => {
-  entity.value.path = {
-    position: {
-      x: x,
-      y: y,
-    },
-  };
-};
-
-const updatePlayer = () => {
-  if (entity.value.path != null) {
-    const entityCenter_offset_X = entity.value.width / 2;
-    const entityCenter_offset_Y = entity.value.height / 2;
-
-    const delta_X =
-   entity.value.path.position.x - (entity.value.position.x + entityCenter_offset_X);
-    const delta_Y =
-    entity.value.path.position.y - (entity.value.position.y + entityCenter_offset_Y);
-    const z = Math.sqrt(Math.pow(delta_X, 2) + Math.pow(delta_Y, 2));
-
-    if (delta_X > 0) {
-      entity.value.orientation = 0;
-    } else {
-      entity.value.orientation = 1;
-    }
-
-    const ratio = entity.value.speed / z;
-    if (ratio >= 1) {
-      entity.value.position.x = entity.value.path.position.x - entityCenter_offset_X;
-      entity.value.position.y = entity.value.path.position.y - entityCenter_offset_Y;
-      entity.value.path = null;
-    } else {
-      entity.value.position.x += ratio * delta_X;
-      entity.value.position.y += ratio * delta_Y;
-    }
-
-    entity.value.currentAction = "run";
-  } else {
-    entity.value.currentAction = "idle";
-  }
-  // if (doObjectsCollide(entity.value, enemy.value)) {
-  //   resetEnemy();
-  //   cash.value += 10;
-  // }
-  drawPlayer();
-};
-
-const drawPlayer = () => {
-  entity.value.update();
-};
 const drawBackground = () => {
   map.value.update();
 };
@@ -236,19 +128,6 @@ const initBackground = () => {
   }
 };
 
-const increaseSpeed = () => {
-  if (cash.value >= 10) {
-    entity.value.speed++;
-    cash.value -= 10;
-  }
-};
-const manageHP = (delta) => {
-  entity.value.currentHp+= delta
-  if(entity.value.currentHp >= entity.value.hp) entity.value.currentHp = entity.value.hp;
-  if(entity.value.currentHp <=0) entity.value.currentHp = 0
-
-  // console.log("CURR HP: ",entity);
-}
 const doObjectsCollide = (unit1, unit2) => {
   let distance = Math.sqrt(
     Math.pow(
@@ -270,53 +149,13 @@ const doObjectsCollide = (unit1, unit2) => {
     return false;
   }
 };
-
-/////////// ENEMY TO DELETE
-
-const resetEnemy = () => {
-  //   const delta_X = Math.random() * gameSettings.value.width -gameSettings.value.width/2;
-  //   const delta_Y = Math.random() * gameSettings.value.width -gameSettings.value.width/2;
-  //   console.log("DETLAS: ",delta_X,delta_Y);
-  enemy.value.position.x = Math.random() * gameSettings.value.width;
-  enemy.value.position.y = Math.random() * gameSettings.value.height;
-
-  if (enemy.value.position.x >= gameSettings.value.width - enemy.value.radius) {
-    enemy.value.position.x = gameSettings.value.width - enemy.value.radius;
-  }
-  if (
-    enemy.value.position.y >=
-    gameSettings.value.height - enemy.value.radius
-  ) {
-    enemy.value.position.y = gameSettings.value.height - enemy.value.radius;
-  }
-
-  if (enemy.value.position.x <= enemy.value.radius) {
-    enemy.value.position.x = enemy.value.radius;
-  }
-  if (enemy.value.position.y <= enemy.value.radius) {
-    enemy.value.position.y = enemy.value.radius;
-  }
-};
-const drawEnemy = () => {
-  if(enemy.value.currentHp <= 0) { resetEnemy();
-    enemy.value.currentHp = enemy.value.hp
-  cash.value += 10;}
-  enemy.value.update();
-};
-
-const  incAttackSpeed=() => {
-  entity.value.attack.attackSpeed -= 0.05;
-  cash.value -=10;
-}
-
-const  incAttack=() => {
-  entity.value.attack.damage += 2;
-  cash.value -=10;
-}
 </script>
 
 <template>
   <div class="container" ref="mainDiv">
+    <audio hidden="true" ref="audio">
+      <source src="../assets/sound/Minimalist4.mp3" type="audio/mpeg" />
+    </audio>
     <div class="row w-100 mb-3">
       <div class="col-sm text-center">Game</div>
       <div class="col-sm text-center">Round: {{ 0 }}</div>
@@ -328,7 +167,7 @@ const  incAttack=() => {
       </div>
     </div>
 
-    <div class="row w-100 text-center">
+    <div class="row w-100 text-center cursor-custom">
       <div>
         <canvas
           ref="myCanvas"
@@ -338,7 +177,7 @@ const  incAttack=() => {
       </div>
     </div>
     <div class="row w-100 bg-info text-center p-5">
-      <div class="col-sm fw-bold">SHOP</div>
+      <div class="col-sm fw-bold" @click="audioHandle()">SHOP</div>
       <div class="col-sm text-center">CASH: {{ cash }}$</div>
 
       <div class="col-sm text-center">
@@ -374,12 +213,7 @@ const  incAttack=() => {
         ++ (10$)
       </div>
 
-
-
-
-      <div class="col-sm text-center">
-        HP
-      </div>
+      <div class="col-sm text-center">HP</div>
       <div
         class="col-sm text-center btn btn-success cursor-pointer"
         :class="false ? ' disabled ' : ''"
@@ -398,4 +232,8 @@ const  incAttack=() => {
   </div>
 </template>
 
-<style lang=""></style>
+<style lang="css">
+body {
+  cursor: url("https://i.ibb.co/n10MnYv/output-onlinepngtools-11.png"), auto;
+}
+</style>
