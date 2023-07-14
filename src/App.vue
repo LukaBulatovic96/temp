@@ -8,7 +8,7 @@ import RandomWord from "./RandomWord.vue";
 import DrawASCII from "./DrawASCII.vue";
 // const net= new brain.NeuralNetwork();
 
-const routerState = ref(0);
+const routerState = ref(4);
 
 
 </script>
