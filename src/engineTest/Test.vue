@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { renderFrame } from "../engine/graphicalFrame/main";
 import { GraphicalObject } from "../engine/graphicalFrame/model/object";
 import {PhysicalObject} from "../engine/physics/model/physicalObject";
@@ -24,6 +24,7 @@ const background = ref({
 
 const objects = ref([]);
 const gameInstance = ref();
+
 onMounted(() => {
   context.value = myCanvas.value.getContext("2d");
   background.value.tile.src = tileSrc.value;
@@ -31,11 +32,21 @@ onMounted(() => {
   gameInstance.value = new GameInstance({
     initObjects:objects.value,
     map: { background: background.value},
-    context: context.value 
+    context: context.value,
+    canvas: myCanvas.value
   })
-  gameInstance.value.gameTick();
+  
+  // gameInstance.value.gameTick();
   // gameTick();
+  tick();
 });
+
+
+
+const tick =() => {
+  window.requestAnimationFrame(tick);
+  gameInstance.value.gameTick();
+}
 
 const flags = ref([]);
 const generateObjects = () => {
@@ -96,7 +107,6 @@ const update = () => {
       if(object.radius>minRAD) object.radius--;
       if (object.position.x < object.radius) flags.value[i].dierction = true;
     }
-    // console.log("update");
   });
 };
 
