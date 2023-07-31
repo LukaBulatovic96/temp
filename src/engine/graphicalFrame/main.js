@@ -1,4 +1,4 @@
-export function renderBE({background: background,  context: context, objects: objects}){ //objects: objects,windowSettings: windowSettings
+export function renderFrame({background: background,  context: context, objects: objects}){ //objects: objects,windowSettings: windowSettings
 
 
     //DRAW BACKGROUND

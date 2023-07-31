@@ -1,5 +1,6 @@
 
-import { renderBE } from "../../graphicalFrameEngine/main"; 
+import { renderFrame } from "../graphicalFrame/main"; 
+import {updatePhysics} from "../physics/main";
 
 export class GameInstance{
 
@@ -16,21 +17,24 @@ export class GameInstance{
 
     gameTick() {
         window.requestAnimationFrame(()=>this.gameTick);
+        this.frame();
         this.update();
-        this.render();
     };
 
     update () {
 
     }
 
-    render () {
-        renderBE({
-          context: this.context,
-          background: this.map.background,
-          objects: this.objects,
-        });
-      };
+    frame () {
+        renderFrame({
+            context: this.context,
+            background: this.map.background,
+            objects: this.objects,
+          });
+        updatePhysics();
+    }
+
+
 
 
 

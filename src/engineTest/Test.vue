@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { renderBE } from "../engine/graphicalFrameEngine/main";
-import { GraphicalObject } from "../engine/graphicalFrameEngine/object";
-import {GameObject} from "../engine/gameEngine/model/gameObject";
-import {GameInstance} from "../engine/gameEngine/model/gameInstance";
+import { renderFrame } from "../engine/graphicalFrame/main";
+import { GraphicalObject } from "../engine/graphicalFrame/model/object";
+import {PhysicalObject} from "../engine/physics/model/physicalObject";
+import {GameInstance} from "../engine/game/main";
 
 const gameSettings = ref({
   width: 900,
@@ -59,7 +59,7 @@ const generateObjects = () => {
     const posX = Math.floor(Math.random() *( gameSettings.value.width-radius*2)) + radius;
     const posY = Math.floor(Math.random() *( gameSettings.value.height-radius*2)) + radius;
     
-    const tempObject = new GameObject({graphicalObject:{
+    const tempObject = new PhysicalObject({graphicalObject:{
       position: { x: posX, y: posY },
       context: context.value,
       assetObject: null,
@@ -67,14 +67,14 @@ const generateObjects = () => {
       color: colors[color],
       radius: radius,
     },
-    gameProperty:'test'
+    physicalProperty:'test'
 });
     objects.value.push(tempObject);
   }
 };
 
 const render = () => {
-  renderBE({
+  renderFrame({
     context: context.value,
     background: background.value,
     objects: objects.value,
