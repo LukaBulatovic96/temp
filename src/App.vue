@@ -6,9 +6,10 @@ import Game2 from "./Game2.vue";
 import Bulatato from "./bulatato/BulatatoMain.vue";
 import RandomWord from "./RandomWord.vue";
 import DrawASCII from "./DrawASCII.vue";
+import Test from "./engineTest/Test.vue";
 // const net= new brain.NeuralNetwork();
 
-const routerState = ref(4);
+const routerState = ref(2);
 
 
 </script>
@@ -42,7 +43,7 @@ const routerState = ref(4);
 <div class=" ">
 <Perlin v-if="routerState==0"/>
 <Game2 v-if="routerState==1"/>
-<Bulatato v-if="routerState==2"/>
+<Test v-if="routerState==2"/>
 <RandomWord v-if="routerState==3" />
 <DrawASCII v-if="routerState==4" />
 </div>
