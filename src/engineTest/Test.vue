@@ -35,38 +35,29 @@ onMounted(() => {
     context: context.value,
     canvas: myCanvas.value
   })
-  
-  // gameInstance.value.gameTick();
-  // gameTick();
   tick();
 });
 
 
 
-const tick =() => {
+const tick =async () => {
   window.requestAnimationFrame(tick);
-  gameInstance.value.gameTick();
+  await gameInstance.value.gameTick();
 }
 
-const flags = ref([]);
 const generateObjects = () => {
   const colors = [
-    "#2391cc",
-    "#167fb8",
-    "#0b6ca1",
-    "#06517a",
-    "#46067a",
-    "#5e0ba1",
-    "#7816c7",
-    "#a80d2f",
-    "#22c75e",
-    "#128a3d",
+    "#5eeb60",
+    "#7ff581",
+    "#4aed4c",
+    "#37b839",
+    "#21eb24",
+    "#0acf0d",
   ];
-  for (let index = 0; index < 50; index++) {
-    const speed = Math.floor(Math.random() * 20) + 8;
-    flags.value.push({ dierction: true, speed: speed });
+  for (let index = 0; index < 200; index++) {
+    const speed = 0;
     const color = Math.floor(Math.random() * 10);
-    const radius = Math.floor(Math.random() * 50) + 5;
+    const radius = Math.floor(Math.random() * 10) + 3;
     const posX = Math.floor(Math.random() *( gameSettings.value.width-radius*2)) + radius;
     const posY = Math.floor(Math.random() *( gameSettings.value.height-radius*2)) + radius;
     
@@ -84,37 +75,6 @@ const generateObjects = () => {
   }
 };
 
-const render = () => {
-  renderFrame({
-    context: context.value,
-    background: background.value,
-    objects: objects.value,
-  });
-};
-
-const update = () => {
-    const maxRAD = 100;
-    const minRAD = 5
-  objects.value.forEach((object, i) => {
-    if (flags.value[i].dierction) {
-      object.position.x += flags.value[i].speed;
-      if(object.radius<maxRAD) object.radius++;
-      if (object.position.x > 900 - object.radius) {
-        flags.value[i].dierction = false;
-      }
-    } else {
-      object.position.x -= flags.value[i].speed;
-      if(object.radius>minRAD) object.radius--;
-      if (object.position.x < object.radius) flags.value[i].dierction = true;
-    }
-  });
-};
-
-const gameTick = () => {
-  window.requestAnimationFrame(gameTick);
-  update();
-  render();
-};
 </script>
 
 <template>
