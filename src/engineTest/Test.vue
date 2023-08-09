@@ -54,7 +54,7 @@ const generateObjects = () => {
     "#21eb24",
     "#0acf0d",
   ];
-  for (let index = 0; index < 400; index++) {
+  for (let index = 0; index < 150; index++) {
     const speed = 0;
     const color = Math.floor(Math.random() * 10);
     const radius = Math.floor(Math.random() * 10) + 3;

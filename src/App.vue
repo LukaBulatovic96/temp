@@ -7,9 +7,10 @@ import Bulatato from "./bulatato/BulatatoMain.vue";
 import RandomWord from "./RandomWord.vue";
 import DrawASCII from "./DrawASCII.vue";
 import Test from "./engineTest/Test.vue";
+import Test2 from "./engineTest/Test2.vue";
 // const net= new brain.NeuralNetwork();
 
-const routerState = ref(2);
+const routerState = ref(5);
 
 
 </script>
@@ -35,6 +36,10 @@ const routerState = ref(2);
      <div class="col-sm d-flex justify-content-center">
       <button type="button" class="btn  w-50"  @click="routerState=4"  :class="routerState==4 ? 'btn-success':'btn-secondary'">Draw Ascii</button>
     </div>
+
+    <div class="col-sm d-flex justify-content-center">
+      <button type="button" class="btn  w-50"  @click="routerState=5"  :class="routerState==5 ? 'btn-success':'btn-secondary'">Game 2</button>
+    </div>
   </div>
  
 
@@ -46,7 +51,9 @@ const routerState = ref(2);
 <Test v-if="routerState==2"/>
 <RandomWord v-if="routerState==3" />
 <DrawASCII v-if="routerState==4" />
+<Test2 v-if="routerState==5"/>
 </div>
+
 </template>
 
 <style>
